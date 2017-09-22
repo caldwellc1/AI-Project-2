@@ -1,26 +1,55 @@
 import pandas as pd
-# print(df['board'][0])
-# print(df['breadth_first_search'][0])
-# split = df['board'].split(';')
-
 
 def breadth_first_search(problem):
     node = Node(problem.init)
     explored = set()
     frontier = [node]
+    answer = []
     while frontier:
         node = frontier.pop(0)
         if problem.goal_test(node.state):
-            return node #solution(node)
-        explored.add(node.state)
+            return solution(node, answer) #solution(node)
+        explored.add(tuple(node.state))
         for action in problem.actions(node.state):
-            child = Node(problem, node, action)
-            if child.state #not in explored or frontier:
-                frontier.append(child) #frontier?
-            elif child.state #in frontier higher cost:
-                #replace frontier node with child
-    return None
+            child = child_node(problem, node, action)
+            if tuple(child.state) in explored or child_in_frontier(frontier, child.state): #not in explored or frontier:
+                frontier.append(child)
+            elif child_higher_cost(frontier, child): #in frontier higher cost:
+                frontier[get_index(frontier, child.state)] = child#replace frontier node with child
+    return answer
 
+def get_index(frontier, state):
+    for a in range(len(frontier)):
+        if frontier[a].state == state:
+            return a
+    return IndexError
+
+def child_higher_cost(frontier, child):
+    for a in range(len(frontier)):
+        if frontier[a].state == child.state:
+            if frontier[a].path_cost > child.path_cost:
+                return True
+            else:
+                return False
+    return False
+
+def child_in_frontier(frontier, test):
+    for a in range(len(frontier)):
+        if frontier[a].state == test:
+            return False
+    return True
+
+def solution(node, answer):
+    if node.parent is None:
+        answer.insert(0, node.action)
+        return answer
+    else:
+        answer.insert(0, node.acion)
+        next_node = node.parent
+        solution(next_node, answer)
+
+def child_node(problem, parent, action):
+    return Node(problem.result(parent.state, action), parent, action, parent.path_cost + 1)
 
 class Problem:
     def __init__(self, board):
@@ -43,12 +72,12 @@ class Problem:
                 if row[m] == '^':
                     x = m
                     y = k
-        in_car = []
-        on_board = []
+        in_car = set()
+        on_board = set()
         # get animals on board
         for i in range(len(board)):
-            if ord(board[i]) >= 97 and ord(board[i]) <= 122:
-                on_board.append(board[i])
+            if 97 <= ord(board[i]) <= 122:
+                on_board.add(board[i])
         self.init = [x, y, in_car, on_board]
         self.board = matrix_board
         self.path_cost = 0
@@ -56,18 +85,66 @@ class Problem:
     def actions(self, state):
         return ['d', 'l', 'r', 'u']
 
-
     def result(self, state, action):
+        new_state = state
         if action == 'd':
+            move = self.board[state[0]][state[1]+1]
+            if move != '.':
+                if 97 <= ord(move) <= 122:
+                    if move not in state[2] and move in state[3]:
+                        state[2].add(move)
+                        state[3].remove(move)
+                        new_state = [state[0], state[1]+1, state[2], state[3]]
+                elif 65 <= ord(move) <= 90:
+                    if move.lower in state[2]:
+                        state[2].remove(move)
+                        new_state = [state[0], state[1]+1, state[2], state[3]]
+                else:
+                    new_state = [state[0], state[1]+1, state[2], state[3]]
             #see if can move, if so move, see if pet there or house
         elif action == 'l':
-            new_state = state + 1
+            move = self.board[state[0]-1][state[1]]
+            if move != '.':
+                if 97 <= ord(move) <= 122:
+                    if move not in state[2] and move in state[3]:
+                        state[2].add(move)
+                        state[3].remove(move)
+                        new_state = [state[0]-1, state[1], state[2], state[3]]
+                elif 65 <= ord(move) <= 90:
+                    if move.lower in state[2]:
+                        state[2].remove(move)
+                        new_state = [state[0]-1, state[1], state[2], state[3]]
+                else:
+                    new_state = [state[0]-1, state[1], state[2], state[3]]
         elif action == 'r':
-            new_state = state + 1
+            move = self.board[state[0]+1][state[1]]
+            if move != '.':
+                if 97 <= ord(move) <= 122:
+                    if move not in state[2] and move in state[3]:
+                        state[2].add(move)
+                        state[3].remove(move)
+                        new_state = [state[0]+1, state[1], state[2], state[3]]
+                elif 65 <= ord(move) <= 90:
+                    if move.lower in state[2]:
+                        state[2].remove(move)
+                        new_state = [state[0]+1, state[1], state[2], state[3]]
+                else:
+                    new_state = [state[0]+1, state[1], state[2], state[3]]
         elif action == 'u':
-            new_state = state + 1
-        #return = new_state
-
+            move = self.board[state[0]][state[1]-1]
+            if move != '.':
+                if 97 <= ord(move) <= 122:
+                    if move not in state[2] and move in state[3]:
+                        state[2].add(move)
+                        state[3].remove(move)
+                        new_state = [state[0], state[1]-1, state[2], state[3]]
+                elif 65 <= ord(move) <= 90:
+                    if move.lower in state[2]:
+                        state[2].remove(move)
+                        new_state = [state[0], state[1]-1, state[2], state[3]]
+                else:
+                    new_state = [state[0], state[1]-1, state[2], state[3]]
+        return new_state
 
     def goal_test(self, state):
         return len(state[2]) == 0 and len(state[3]) == 0
