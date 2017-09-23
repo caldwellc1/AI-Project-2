@@ -8,28 +8,17 @@ def breadth_first_search(problem):
     answer = []
     while frontier:
         node = frontier.pop(0)
-        print(frontier)
-        # print('node', node.state, node.path_cost)
         if problem.goal_test(node.state):
             return solution(node, answer)
-        explored.add(tuple_list(node.state))
+        explored.add(tuple(node.state))
         for action in problem.actions(node.state):
             child = child_node(problem, node, action)
-            # print('child', child.state, child.parent.state)
-            if tuple_list(child.state) not in explored and child_not_in_frontier(frontier, child.state):
-                # print('front', child.state)
+            if tuple(child.state) not in explored and child_not_in_frontier(frontier, tuple(child.state)):
                 frontier.append(child)
             elif child_higher_cost(frontier, child):  # in frontier higher cost:
                 print('hit')
                 frontier[get_index(frontier, child.state)] = child
     return answer
-
-
-def tuple_list(node):
-    two = tuple(node[2])
-    three = tuple(node[3])
-    return tuple([node[0], node[1], two, three])
-
 
 def get_index(frontier, state):
     for a in range(len(frontier)):
@@ -40,7 +29,7 @@ def get_index(frontier, state):
 
 def child_higher_cost(frontier, child):
     for a in range(len(frontier)):
-        if frontier[a].state == child.state:
+        if frontier[a].state == tuple(child.state):
             if frontier[a].path_cost > child.path_cost:
                 return True
             else:
@@ -59,7 +48,7 @@ def solution(node, answer):
     if node.parent is None:
         return answer
     else:
-        answer.append(node.action)
+        answer.insert(0, node.action)
         next_node = node.parent
         solution(next_node, answer)
     return answer
@@ -95,7 +84,7 @@ class Problem:
         for i in range(len(board)):
             if 97 <= ord(board[i]) <= 122:
                 on_board.append(board[i])
-        self.init = [x, y, in_car, on_board]
+        self.init = [x, y, tuple(in_car), tuple(on_board)]
         self.board = matrix_board
         self.path_cost = 0
 
@@ -109,15 +98,15 @@ class Problem:
             if move != '.':
                 if 97 <= ord(move) <= 122:
                     if move not in state[2] and move in state[3]:
-                        state[2].append(move)
-                        state[3].remove(move)
-                        new_state = [state[0]+1, state[1], state[2], state[3]]
+                        two = state[2] + tuple(move)
+                        three = tuple([r for r in state[3] if r != move])
+                        new_state = [state[0]+1, state[1], two, three]
                     else:
                         new_state = [state[0]+1, state[1], state[2], state[3]]
                 elif 65 <= ord(move) <= 90:
                     if move.lower() in state[2]:
-                        state[2].remove(move.lower())
-                        new_state = [state[0]+1, state[1], state[2], state[3]]
+                        two = tuple([t for t in state[2] if t != move.lower()])
+                        new_state = [state[0]+1, state[1], two, state[3]]
                     else:
                         new_state = [state[0]+1, state[1], state[2], state[3]]
                 else:
@@ -128,15 +117,15 @@ class Problem:
             if move != '.':
                 if 97 <= ord(move) <= 122:
                     if move not in state[2] and move in state[3]:
-                        state[2].append(move)
-                        state[3].remove(move)
-                        new_state = [state[0], state[1]-1, state[2], state[3]]
+                        two = state[2] + tuple(move)
+                        three = tuple([r for r in state[3] if r != move])
+                        new_state = [state[0], state[1]-1, two, three]
                     else:
                         new_state = [state[0], state[1]-1, state[2], state[3]]
                 elif 65 <= ord(move) <= 90:
                     if move.lower() in state[2]:
-                        state[2].remove(move.lower())
-                        new_state = [state[0], state[1]-1, state[2], state[3]]
+                        two = tuple([t for t in state[2] if t != move.lower()])
+                        new_state = [state[0], state[1]-1, two, state[3]]
                     else:
                         new_state = [state[0], state[1]-1, state[2], state[3]]
                 else:
@@ -146,15 +135,15 @@ class Problem:
             if move != '.':
                 if 97 <= ord(move) <= 122:
                     if move not in state[2] and move in state[3]:
-                        state[2].append(move)
-                        state[3].remove(move)
-                        new_state = [state[0], state[1]+1, state[2], state[3]]
+                        two = state[2] + tuple(move)
+                        three = tuple([r for r in state[3] if r != move])
+                        new_state = [state[0], state[1]+1, two, three]
                     else:
                         new_state = [state[0], state[1]+1, state[2], state[3]]
                 elif 65 <= ord(move) <= 90:
                     if move.lower() in state[2]:
-                        state[2].remove(move.lower())
-                        new_state = [state[0], state[1]+1, state[2], state[3]]
+                        two = tuple([t for t in state[2] if t != move.lower()])
+                        new_state = [state[0], state[1]+1, two, state[3]]
                     else:
                         new_state = [state[0], state[1]+1, state[2], state[3]]
                 else:
@@ -164,15 +153,15 @@ class Problem:
             if move != '.':
                 if 97 <= ord(move) <= 122:
                     if move not in state[2] and move in state[3]:
-                        state[2].append(move)
-                        state[3].remove(move)
-                        new_state = [state[0]-1, state[1], state[2], state[3]]
+                        two = state[2] + tuple(move)
+                        three = tuple([r for r in state[3] if r != move])
+                        new_state = [state[0]-1, state[1], two, three]
                     else:
                         new_state = [state[0]-1, state[1], state[2], state[3]]
                 elif 65 <= ord(move) <= 90:
                     if move.lower() in state[2]:
-                        state[2].remove(move.lower())
-                        new_state = [state[0]-1, state[1], state[2], state[3]]
+                        two = tuple([t for t in state[2] if t != move.lower()])
+                        new_state = [state[0]-1, state[1], two, state[3]]
                     else:
                         new_state = [state[0]-1, state[1], state[2], state[3]]
                 else:
