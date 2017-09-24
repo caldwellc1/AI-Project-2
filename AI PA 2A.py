@@ -1,14 +1,17 @@
 import pandas as pd
+import sys
 
 
-def breadth_first_search(problem):
+def a_star(problem):
     node = Node(problem.init)
     explored = set()
     frontier = [node]
     answer = []
     count = 0
     while frontier:
-        node = frontier.pop(0)
+        index_frontier = priority(frontier)
+        node = frontier[index_frontier]
+        frontier.pop(index_frontier)
         if problem.goal_test(node.state):
             print(count)
             return solution(node, answer)
@@ -22,6 +25,19 @@ def breadth_first_search(problem):
                 print('hit')
                 frontier[get_index(frontier, child.state)] = child
     return answer
+
+
+def priority(frontier):
+    f = []
+    for c in range(len(frontier)):
+        f.append(frontier[c].path_cost + h(frontier[c].state))
+    min_value = min(f)
+    return f.index(min_value)
+
+
+def h(state):
+    return len(state[2]) + 2 * len(state[3])
+
 
 def get_index(frontier, state):
     for a in range(len(frontier)):
@@ -204,9 +220,10 @@ class Node:
 
 
 def main():
-    df = pd.read_csv('breadth_first_search_test.csv')
-    problem = Problem(df['board'][17])
-    print(breadth_first_search(problem))
+    df = pd.read_csv('lumosity_a_star_search_train.csv')
+    for z in range(7, 12):
+        problem = Problem(df['board'][z])
+        print(a_star(problem))
 
 if __name__ == '__main__':
     main()
