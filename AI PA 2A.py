@@ -1,5 +1,4 @@
 import pandas as pd
-import sys
 
 
 def a_star(problem):
@@ -21,7 +20,7 @@ def a_star(problem):
             count += 1
             if tuple(child.state) not in explored and child_not_in_frontier(frontier, tuple(child.state)):
                 frontier.append(child)
-            elif child_higher_cost(frontier, child):  # in frontier higher cost:
+            elif child_higher_cost(frontier, child):
                 print('hit')
                 frontier[get_index(frontier, child.state)] = child
     return answer
@@ -79,7 +78,6 @@ def child_node(problem, parent, action):
 
 class Problem:
     def __init__(self, board):
-        # split board in to a list/matrix of rows and columns
         matrix_board = []
         row = []
         for j in range(len(board)):
@@ -88,7 +86,6 @@ class Problem:
             else:
                 matrix_board.append(row)
                 row = []
-        # get location of ^ for x and y
         x = 0
         y = 0
         for k in range(len(matrix_board)):
@@ -99,7 +96,6 @@ class Problem:
                     y = m
         in_car = []
         on_board = []
-        # get animals on board
         for i in range(len(board)):
             if 97 <= ord(board[i]) <= 122:
                 on_board.append(board[i])
@@ -122,7 +118,7 @@ class Problem:
     def result(self, state, action):
         new_state = state
         if action == 'd':
-            for g in range(1,3):
+            for g in range(1, 3):
                 move = self.board[state[0]+g][state[1]]
                 if move != '.':
                     if 97 <= ord(move) <= 122:
@@ -143,7 +139,7 @@ class Problem:
                 else:
                     break
         elif action == 'l':
-            for g in range(1,3):
+            for g in range(1, 3):
                 move = self.board[state[0]][state[1]-g]
                 if move != '.':
                     if 97 <= ord(move) <= 122:
@@ -164,7 +160,7 @@ class Problem:
                 else:
                     break
         elif action == 'r':
-            for g in range(1,3):
+            for g in range(1, 3):
                 move = self.board[state[0]][state[1]+g]
                 if move != '.':
                     if 97 <= ord(move) <= 122:
@@ -185,7 +181,7 @@ class Problem:
                 else:
                     break
         elif action == 'u':
-            for g in range(1,3):
+            for g in range(1, 3):
                 move = self.board[state[0]-g][state[1]]
                 if move != '.':
                     if 97 <= ord(move) <= 122:
@@ -221,9 +217,8 @@ class Node:
 
 def main():
     df = pd.read_csv('lumosity_a_star_search_train.csv')
-    for z in range(7, 12):
-        problem = Problem(df['board'][z])
-        print(a_star(problem))
+    problem = Problem(df['board'][11])
+    print(a_star(problem))
 
 if __name__ == '__main__':
     main()
