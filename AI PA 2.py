@@ -1,14 +1,18 @@
 import pandas as pd
+import collections
 
 
 def breadth_first_search(problem):
     node = Node(problem.init)
     explored = set()
-    frontier = [node]
+    frontier = collections.deque()
+    frontier.append(node)
+    dict_front = {tuple(node.state): 0}
     answer = []
     count = 0
     while frontier:
-        node = frontier.pop(0)
+        node = frontier.popleft()
+        del dict_front[tuple(node.state)]
         if problem.goal_test(node.state):
             print(count)
             return solution(node, answer)
@@ -16,10 +20,9 @@ def breadth_first_search(problem):
         for action in problem.actions(node.state):
             child = child_node(problem, node, action)
             count += 1
-            if tuple(child.state) not in explored and child_not_in_frontier(frontier, tuple(child.state)):
+            if tuple(child.state) not in explored and tuple(child.state) not in dict_front:
                 frontier.append(child)
-            elif child_higher_cost(frontier, child):
-                frontier[get_index(frontier, child.state)] = child
+                dict_front.update({tuple(child.state): count})
     return answer
 
 
@@ -201,9 +204,11 @@ class Node:
 
 
 def main():
-    df = pd.read_csv('breadth_first_search_test.csv')
-    problem = Problem(df['board'][51])
-    print(breadth_first_search(problem))
+    df = pd.read_csv('test.csv')
+    for b in range(35, 45):
+        problem = Problem(df['board'][b])
+        with open('answers.txt', 'a') as fp:
+            fp.write(str(breadth_first_search(problem))+'b'+"\n")
 
 if __name__ == '__main__':
     main()

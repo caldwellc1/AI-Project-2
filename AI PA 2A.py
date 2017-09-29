@@ -1,16 +1,21 @@
 import pandas as pd
+import collections
 
 
 def a_star(problem):
     node = Node(problem.init)
     explored = set()
-    frontier = [node]
+    frontier = collections.deque()
+    frontier.append(node)
+    dict = {tuple(node.state): path_cost(node)}
     answer = []
     count = 0
     while frontier:
-        index_frontier = priority(frontier)
-        node = frontier[index_frontier]
-        frontier.pop(index_frontier)
+        min_node = min(dict, key = dict.get)
+        index_frontier = priority(frontier, min_node)
+        node = list(frontier)[index_frontier]
+        frontier.remove(node)
+        del dict[tuple(node.state)]
         if problem.goal_test(node.state):
             print(count)
             return solution(node, answer)
@@ -18,20 +23,23 @@ def a_star(problem):
         for action in problem.actions(node.state):
             child = child_node(problem, node, action)
             count += 1
-            if tuple(child.state) not in explored and child_not_in_frontier(frontier, tuple(child.state)):
+            if tuple(child.state) not in explored and tuple(child.state) not in dict:
                 frontier.append(child)
+                dict.update({tuple(child.state): path_cost(child)})
             elif child_higher_cost(frontier, child):
-                print('hit')
                 frontier[get_index(frontier, child.state)] = child
     return answer
 
 
-def priority(frontier):
-    f = []
-    for c in range(len(frontier)):
-        f.append(frontier[c].path_cost + h(frontier[c].state))
-    min_value = min(f)
-    return f.index(min_value)
+def path_cost(node):
+    return node.path_cost + h(node.state)
+
+
+def priority(frontier, min):
+    for q in range(len(frontier)):
+        if tuple(frontier[q].state) == min:
+            return q
+    return IndexError
 
 
 def h(state):
@@ -216,9 +224,11 @@ class Node:
 
 
 def main():
-    df = pd.read_csv('lumosity_a_star_search_train.csv')
-    problem = Problem(df['board'][11])
-    print(a_star(problem))
+    df = pd.read_csv('test.csv')
+    for u in range(33, 51):
+        problem = Problem(df['board'][u])
+        with open('answers2.txt', 'a') as fp:
+            fp.write(str(a_star(problem)) + str(u) +"\n")
 
 if __name__ == '__main__':
     main()
